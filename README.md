@@ -13,7 +13,7 @@ Quick Start:
 TODO:
 
 - [x] Basic request profiling with pluggable outputs
-- [ ] SQL Query tracking
+- [x] SQL Query tracking
 - [ ] Custom attribute tracking
 - [ ] Actual Python code profiling
 - [ ] Analyzers
