@@ -15,6 +15,7 @@ class SnoopyRequest:
             'request': request.path,
             'method': request.method,
             'queries': [],
+            'custom_attributes': {},
             'start_time': datetime.datetime.now()
         }
         _snoopy_request.request = request
@@ -35,6 +36,14 @@ class SnoopyRequest:
             (query_data['end_time'] - query_data['start_time'])
         _snoopy_request.data['queries'].append(query_data)
 
+
+    @staticmethod
+    def record_custom_attributes(custom_data):
+        """
+        `custom_data` must be JSON serializable dict.
+        datetime / timedelta objects are handled.
+        """
+        _snoopy_request.data['custom_attributes'].update(custom_data)
 
     @staticmethod
     def register_response(response):
