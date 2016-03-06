@@ -4,8 +4,11 @@ from snoopy.helpers import custom_import
 from snoopy.query_tracker import execute_sql, execute_insert_sql
 from snoopy.request import SnoopyRequest
 
+
 class Snoopy:
     DEFAULT_SETTINGS = {
+        'DEFAULT_USE_CPROFILE': False,
+        'DEFAULT_CPROFILE_SHOW_ALL_FUNCTIONS': False,
         'DEFAULT_COLLECT_SQL_QUERIES': True,
         'DEFAULT_OUTPUT_CLASS': 'snoopy.output.LogOutput'
     }
@@ -37,7 +40,11 @@ class Snoopy:
     def register_request(request):
         if Snoopy.get_setting('COLLECT_SQL_QUERIES'):
             Snoopy._injectSQLTrackers()
-        SnoopyRequest.register_request(request)
+
+        SnoopyRequest.register_request(request, {
+            'USE_CPROFILE': Snoopy.get_setting('USE_CPROFILE'),
+            'CPROFILE_SHOW_ALL_FUNCTIONS': Snoopy.get_setting('CPROFILE_SHOW_ALL_FUNCTIONS')
+        })
 
 
     @staticmethod
