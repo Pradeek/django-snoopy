@@ -18,7 +18,8 @@ SnoopyRequest.record_custom_attributes({
     'key': 'value'
 })
 ```
-Any value set twice will just be overridden
+Any value set twice will just be overridden.
+
 **IMPORTANT** The data passed into this MUST be a JSON serializable dictionary.
 
 TODO:

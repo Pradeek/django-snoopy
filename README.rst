@@ -16,11 +16,10 @@ Quick Start
 Setting Custom Attributes:
 --------------------------
 In case you want to track something specific to your app, you can do this:
-```
+
 from snoopy.request import SnoopyRequest
-SnoopyRequest.record_custom_attributes({
-    'key': 'value'
-})
-```
-Any value set twice will just be overridden
+SnoopyRequest.record_custom_attributes({'key': 'value'})
+
+Any value set twice will just be overridden.
+
 IMPORTANT: The data passed into this MUST be a JSON serializable dictionary.
