@@ -1,18 +1,17 @@
 import cProfile
 import datetime
-import os
 import pstats
 import StringIO
 import threading
+
+from snoopy.helpers import get_app_root
 
 
 _snoopy_request = threading.local()
 
 
 def clean_profiler_result(result):
-    settings_module = __import__(os.environ['DJANGO_SETTINGS_MODULE'])
-    settings_path = settings_module.__path__[0]
-    app_root = os.path.abspath(os.path.join(settings_path, os.pardir))
+    app_root = get_app_root()
 
     lines = result.split("\n")
     relevant_result = lines[:5] + [line for line in lines[6:] if app_root in line]

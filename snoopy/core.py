@@ -8,7 +8,7 @@ from snoopy.request import SnoopyRequest
 class Snoopy:
     DEFAULT_SETTINGS = {
         'DEFAULT_USE_CPROFILE': False,
-        'DEFAULT_CPROFILE_SHOW_ALL_FUNCTIONS': False,
+        'DEFAULT_CPROFILE_SHOW_ALL_FUNCTIONS': True,
         'DEFAULT_COLLECT_SQL_QUERIES': True,
         'DEFAULT_OUTPUT_CLASS': 'snoopy.output.LogOutput'
     }

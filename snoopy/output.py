@@ -3,6 +3,8 @@ import json
 import os
 import urllib2
 
+from snoopy.helpers import get_app_root
+
 
 def default_json_serializer(obj):
     if isinstance(obj, datetime.datetime):
@@ -24,10 +26,11 @@ class LogOutput(OutputBase):
     @staticmethod
     def save_request_data(request_data):
         from django.conf import settings
-        file_prefix = getattr(
-            settings, 'SNOOPY_FILE_PREFIX', LogOutput.DEFAULT_FILE_PREFIX)
+        file_prefix = LogOutput.DEFAULT_FILE_PREFIX
         file_path = file_prefix + request_data['end_time'].isoformat() + '.log'
-        with open(os.path.join(settings.LOGS_DIR, file_path), "w") as output:
+        app_root = get_app_root()
+        log_dir = getattr(settings, 'SNOOPY_LOG_OUTPUT_DIR', app_root)
+        with open(os.path.join(log_dir, file_path), "w") as output:
             result = json.dumps(request_data, default=default_json_serializer)
             output.write(result)
 
