@@ -30,12 +30,6 @@ Settings:
 ---------
 You can set these in your Django settings.py file to configure how Snoopy works
 
-SNOOPY_USE_CPROFILE: False
-  - Set to True if you want profiling
-
-SNOOPY_CPROFILE_SHOW_ALL_FUNCTIONS: True
-  - If this option is set to False, django-snoopy will take the parent directory of the main django settings file as the project root and will only list items in the cProfile output that are files under this directory (your actual app code)
-
 SNOOPY_COLLECT_SQL_QUERIES: True
   - Track all SQL queries done via the Django ORM
 
@@ -47,3 +41,17 @@ SNOOPY_OUTPUT_CLASS: 'snoopy.output.LogOutput'
     - `snoopy.output.HTTPOutput`: This will make a JSON formatted HTTP POST with the data in `SNOOPY_HTTP_OUTPUT_URL`
 
   - You can write your own Output class. All you need to do is to extend `snoopy.output.OutputBase` and implement the `save_request_data` method.
+
+
+  SNOOPY_USE_CPROFILE: False
+    - Set to True if you want profiling
+
+  SNOOPY_CPROFILE_SHOW_ALL_FUNCTIONS: True
+    - If this option is set to False, django-snoopy will take the parent directory of the main django settings file as the project root and will only list items in the cProfile output that are files under this directory (your actual app code)
+
+
+  DEFAULT_USE_BUILTIN_PROFILER': False
+    - Set to True if you want to use the built-in profiler/tracer
+
+  DEFAULT_BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS': True
+    - Like the cProfile option counterpart, allows you to specify if you want data about all or just your own code.

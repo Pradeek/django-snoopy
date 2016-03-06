@@ -10,6 +10,8 @@ class Snoopy:
         'DEFAULT_USE_CPROFILE': False,
         'DEFAULT_CPROFILE_SHOW_ALL_FUNCTIONS': True,
         'DEFAULT_COLLECT_SQL_QUERIES': True,
+        'DEFAULT_USE_BUILTIN_PROFILER': False,
+        'DEFAULT_BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS': True,
         'DEFAULT_OUTPUT_CLASS': 'snoopy.output.LogOutput'
     }
 
@@ -43,7 +45,9 @@ class Snoopy:
 
         SnoopyRequest.register_request(request, {
             'USE_CPROFILE': Snoopy.get_setting('USE_CPROFILE'),
-            'CPROFILE_SHOW_ALL_FUNCTIONS': Snoopy.get_setting('CPROFILE_SHOW_ALL_FUNCTIONS')
+            'CPROFILE_SHOW_ALL_FUNCTIONS': Snoopy.get_setting('CPROFILE_SHOW_ALL_FUNCTIONS'),
+            'USE_BUILTIN_PROFILER': Snoopy.get_setting('USE_BUILTIN_PROFILER'),
+            'BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS': Snoopy.get_setting('BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS')
         })
 
 
