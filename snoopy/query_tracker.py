@@ -4,6 +4,7 @@ import traceback
 from django.db.models.sql.compiler import SQLUpdateCompiler, SQLDeleteCompiler
 from django.db.models.sql.datastructures import EmptyResultSet
 
+from snoopy.request import SnoopyRequest
 
 QUERY_TYPE_READ = 'read'
 QUERY_TYPE_WRITE = 'write'
@@ -66,9 +67,7 @@ def execute_sql(self, *args, **kwargs):
     finally:
         # This gets called just before the `return`
         query_dict['end_time'] = datetime.datetime.now()
-        # TODO: Fix circular import
-        from snoopy.core import Snoopy
-        Snoopy.record_query(query_dict)
+        SnoopyRequest.record_query_data(query_dict)
 
 
 def execute_insert_sql(self, *args, **kwargs):
@@ -88,6 +87,4 @@ def execute_insert_sql(self, *args, **kwargs):
     finally:
         # This gets called just before the `return`
         query_dict['end_time'] = datetime.datetime.now()
-        # TODO: Fix circular import
-        from snoopy.core import Snoopy
-        Snoopy.record_query(query_dict)
+        SnoopyRequest.record_query_data(query_dict)

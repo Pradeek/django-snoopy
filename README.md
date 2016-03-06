@@ -16,4 +16,5 @@ TODO:
 - [x] SQL Query tracking
 - [ ] Custom attribute tracking
 - [ ] Actual Python code profiling
-- [ ] Analyzers
+- [ ] Lightweight function tracing. See [Dropbox and Nylas blog posts](https://news.ycombinator.com/item?id=10811373)
+- [ ] Analyzers / Visualizers
