@@ -27,7 +27,7 @@ TODO:
 - [x] Basic request profiling with pluggable outputs
 - [x] SQL Query tracking
 - [x] Custom attribute tracking
-- [ ] Make tracking configurable
+- [x] Make tracking configurable
 - [ ] Actual Python code profiling
 - [ ] Lightweight function tracing. See [Dropbox and Nylas blog posts](https://news.ycombinator.com/item?id=10811373)
 - [ ] Analyzers / Visualizers
