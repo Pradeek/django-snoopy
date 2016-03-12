@@ -49,3 +49,22 @@ class HTTPOutput(OutputBase):
             response = urllib2.urlopen(request)
             response.read()
             response.close()
+
+
+class ElasticsearchOutput(OutputBase):
+    @staticmethod
+    def save_request_data(request_data):
+        from django.conf import settings
+        if hasattr(settings, 'SNOOPY_ELASTICSEARCH_OUTPUT_URL'):
+            start_time = datetime.datetime.now()
+            data = request_data
+            index = request_data['start_time'].date().isoformat().replace('-', '.')
+            url = settings.SNOOPY_ELASTICSEARCH_OUTPUT_URL + 'snoopy-' + index + '/request/'
+            data = json.dumps(request_data, default=default_json_serializer)
+            request = urllib2.Request(
+                url, data, {'Content-Type': 'application/json'})
+            response = urllib2.urlopen(request)
+            response.read()
+            response.close()
+            end_time = datetime.datetime.now()
+            print 'Posted to Elasticsearch in %0.4f' % ((end_time - start_time).total_seconds())

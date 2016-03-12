@@ -36,12 +36,13 @@ class SnoopyRequest:
     def profile(frame, event, args):
         # This still traces almost everything. Need to investigate how to do this less frequently
         # so that it can even be run on production.
-        if event == 'call':
+        if event == 'call' or event == 'return':
             if not _snoopy_request.settings['BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS']:
                 if not _snoopy_request.app_root in frame.f_code.co_filename:
                     return
 
             trace_data = {
+                'event': event,
                 'timestamp': datetime.datetime.now()
             }
             trace_data.update(get_trace_data(frame))
