@@ -8,7 +8,9 @@ def default_json_serializer(obj):
         return obj.isoformat()
     if isinstance(obj, datetime.timedelta):
         return obj.total_seconds()
-    raise TypeError('Not sure how to serialize %s' % (obj,))
+    if hasattr(obj, 'to_representation'):
+        return obj.to_representation()
+    raise TypeError('Not sure how to serialize %s %s' % (type(obj),obj,))
 
 
 def custom_import(cls_path):

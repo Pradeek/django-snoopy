@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from snoopy.helpers import get_app_root, default_json_serializer
+from snoopy.trace import Trace
 
 import datetime
 import json
@@ -8,8 +9,7 @@ import re
 
 
 DJANGO_DB_QUERY_FILE = "django/db/models/query.py"
-TRACE_KEY_REGEX = r"([^:]+)::([^:]+):([\d]+)"
-PYTHON_DATEFORMAT = "%Y-%m-%dT%H:%M:%S.%f"
+
 
 class TraceAnalyzer(object):
     def __init__(self, data):
@@ -19,28 +19,6 @@ class TraceAnalyzer(object):
         self.app_root = get_app_root()
 
 
-    def get_trace_key(self, frame):
-        return "%s::%s:%d" % (frame['module'], frame['function'], frame['line_number'])
-
-
-    def process_trace(self, trace):
-        module, function, line_number = re.search(TRACE_KEY_REGEX, trace['key']).groups()
-        event = 'call' if 'start_time' in trace else 'return'
-        if event == 'call':
-            self.profiler_info['trace_calls'].append({
-                'module': module,
-                'function': function,
-                'start_line_number': line_number,
-                'start_time': datetime.datetime.strptime(trace['start_time'], PYTHON_DATEFORMAT)
-            })
-        elif event == 'return':
-            trace_call = self.profiler_info['trace_calls'].pop()
-            trace_call['end_line_number'] = line_number
-            trace_call['end_time'] = datetime.datetime.strptime(trace['end_time'], PYTHON_DATEFORMAT)
-            trace_call['total_time'] = (trace_call['end_time'] - trace_call['start_time']).total_seconds()
-            self.profiler_info['traces'].append(trace_call)
-
-
     def process_builtin_profiler_result(self):
         self.profiler_info['total_traces'] = len(self.trace_data['profiler_traces'])
         if self.profiler_info['total_traces'] == 0:
@@ -48,15 +26,10 @@ class TraceAnalyzer(object):
 
         # Because it contains both call/return events
         self.profiler_info['total_traces'] /= 2
-        self.profiler_info['traces'] = []
-        self.profiler_info['trace_calls'] = []
-
-        for trace in self.trace_data['profiler_traces']:
-            self.process_trace(trace)
+        self.profiler_info['traces'] = Trace(self.trace_data['profiler_traces'])
 
 
     def summarize_profiler_result(self):
-        print 'Profiler Stats:'
         print json.dumps(self.profiler_info['traces'], indent=4, default=default_json_serializer)
 
 
@@ -151,9 +124,9 @@ class TraceAnalyzer(object):
 
 
     def summarize(self):
-        print "Total Request Time: %0.4f" % self.trace_data['total_request_time']
-        print "URL: " + self.trace_data['request']
-        self.summarize_queries()
+        # print "Total Request Time: %0.4f" % self.trace_data['total_request_time']
+        # print "URL: " + self.trace_data['request']
+        # self.summarize_queries()
         self.summarize_profiler_result()
 
 
