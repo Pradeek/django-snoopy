@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import cProfile
 import datetime
 import pstats
@@ -27,6 +29,20 @@ def get_trace_data(frame):
     }
 
 
+def get_trace_key(frame):
+    return "%s::%s:%d" % (frame.f_globals.get('__name__'), frame.f_code.co_name, frame.f_lineno)
+
+
+def should_track_frame(frame):
+    module = frame.f_globals.get('__name__')
+    function = frame.f_code.co_name
+    if module.startswith(_snoopy_request.relevant_apps) and not module.startswith('snoopy'):
+        if not function.startswith("_"):
+            return True
+    return False
+
+
+
 class SnoopyRequest:
     """
     Wrapper for managing Django Requests.
@@ -36,19 +52,19 @@ class SnoopyRequest:
     def profile(frame, event, args):
         # This still traces almost everything. Need to investigate how to do this less frequently
         # so that it can even be run on production.
-        if event == 'call' or event == 'return':
-            if not _snoopy_request.settings['BUILTIN_PROFILER_SHOW_ALL_FUNCTIONS']:
-                if not _snoopy_request.app_root in frame.f_code.co_filename:
-                    return
+        if (event == 'call' or event == 'return') and should_track_frame(frame):
+            key = get_trace_key(frame)
 
-            trace_data = {
-                'event': event,
-                'timestamp': datetime.datetime.now()
-            }
-            trace_data.update(get_trace_data(frame))
-            trace_data['parent_frame'] = get_trace_data(frame.f_back)
-
-            _snoopy_request.data['profiler_traces'].append(trace_data)
+            if event == 'call':
+                _snoopy_request.data['profiler_traces'].append({
+                    'key': key,
+                    'start_time': datetime.datetime.now(),
+                })
+            elif event == 'return':
+                _snoopy_request.data['profiler_traces'].append({
+                    'key': key,
+                    'end_time': datetime.datetime.now(),
+                })
 
     @staticmethod
     def register_request(request, settings):
@@ -63,6 +79,8 @@ class SnoopyRequest:
         _snoopy_request.request = request
         _snoopy_request.data = snoopy_data
         _snoopy_request.settings = settings
+        from django.conf import settings as django_settings
+        _snoopy_request.relevant_apps = tuple(django_settings.INSTALLED_APPS)
 
         app_root = get_app_root()
         _snoopy_request.app_root = app_root

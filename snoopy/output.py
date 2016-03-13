@@ -3,15 +3,7 @@ import json
 import os
 import urllib2
 
-from snoopy.helpers import get_app_root
-
-
-def default_json_serializer(obj):
-    if isinstance(obj, datetime.datetime):
-        return obj.isoformat()
-    if isinstance(obj, datetime.timedelta):
-        return obj.total_seconds()
-    raise TypeError('Not sure how to serialize %s' % (obj,))
+from snoopy.helpers import get_app_root, default_json_serializer
 
 
 class OutputBase:

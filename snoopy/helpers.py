@@ -1,5 +1,14 @@
-import os
+import datetime
 import importlib
+import os
+
+
+def default_json_serializer(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    if isinstance(obj, datetime.timedelta):
+        return obj.total_seconds()
+    raise TypeError('Not sure how to serialize %s' % (obj,))
 
 
 def custom_import(cls_path):
