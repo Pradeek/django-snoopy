@@ -14,6 +14,7 @@ DJANGO_DB_QUERY_FILE = "django/db/models/query.py"
 class TraceAnalyzer(object):
     def __init__(self, data):
         self.trace_data = data
+        self.trace = None
         self.query_info = {}
         self.profiler_info = {}
         self.app_root = get_app_root()
@@ -26,11 +27,10 @@ class TraceAnalyzer(object):
 
         # Because it contains both call/return events
         self.profiler_info['total_traces'] /= 2
-        self.profiler_info['traces'] = Trace(self.trace_data['profiler_traces'])
 
 
     def summarize_profiler_result(self):
-        print json.dumps(self.profiler_info['traces'], indent=4, default=default_json_serializer)
+        print json.dumps(self.trace, indent=4, default=default_json_serializer)
 
 
     def process_traceback_line(self, line):
@@ -128,10 +128,14 @@ class TraceAnalyzer(object):
         # print "URL: " + self.trace_data['request']
         # self.summarize_queries()
         self.summarize_profiler_result()
+        pass
 
 
     def analyze(self):
         self.process_queries()
         self.process_builtin_profiler_result()
+
+        self.trace = Trace(self.trace_data['profiler_traces'], self.trace_data['queries'])
+
         # TODO: Do the cProfiler processing as well
         self.summarize()

@@ -55,15 +55,17 @@ class SnoopyRequest:
         if (event == 'call' or event == 'return') and should_track_frame(frame):
             key = get_trace_key(frame)
 
+            now = datetime.datetime.now()
             if event == 'call':
                 _snoopy_request.data['profiler_traces'].append({
                     'key': key,
-                    'start_time': datetime.datetime.now(),
+                    'start_time': now
                 })
+                _snoopy_request.current_function_key = [key, now]
             elif event == 'return':
                 _snoopy_request.data['profiler_traces'].append({
                     'key': key,
-                    'end_time': datetime.datetime.now(),
+                    'end_time': now
                 })
 
     @staticmethod
@@ -79,6 +81,7 @@ class SnoopyRequest:
         _snoopy_request.request = request
         _snoopy_request.data = snoopy_data
         _snoopy_request.settings = settings
+        _snoopy_request.current_function_key = [None, None]
         from django.conf import settings as django_settings
         _snoopy_request.relevant_apps = tuple(django_settings.INSTALLED_APPS)
 
@@ -105,6 +108,8 @@ class SnoopyRequest:
     def record_query_data(query_data):
         query_data['total_query_time'] = \
             (query_data['end_time'] - query_data['start_time'])
+
+        query_data['function_call_key'] = _snoopy_request.current_function_key
         _snoopy_request.data['queries'].append(query_data)
 
 

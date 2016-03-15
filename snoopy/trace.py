@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import datetime
 import json
 import re
@@ -13,6 +15,7 @@ TRACE_THRESHOLD = 0 #  Bring config for this in the future
 class FunctionCall(object):
     def __init__(self, trace_data, previous=None):
         self.key = trace_data['key']
+        self.queries = []
         self.next = []
         self.previous = previous
         self.start_time = datetime.datetime.strptime(trace_data['start_time'], PYTHON_DATEFORMAT)
@@ -28,10 +31,21 @@ class FunctionCall(object):
         self.total_time = (self.end_time - self.start_time).total_seconds()
 
 
+    def record_query(self, query):
+        self.queries.append({
+            'start_time': query['start_time'],
+            'query_time': query['total_query_time'],
+            'query': query['query'],
+            'model': query['model'],
+            'key': query['function_call_key']
+        })
+
+
     def to_representation(self):
         result = {}
         result[self.key] = {
             'total_time': self.total_time,
+            'queries': self.queries,
             'stats': {
                 'call': self.start_time,
                 'return': self.end_time,
@@ -82,14 +96,18 @@ class Trace(object):
 
     TODO: Combine trace info with SQL timings
     """
-    def __init__(self, data):
-        self.raw_data = data
+    def __init__(self, trace_data, query_data):
+        self.raw_data = {
+            'trace_data': trace_data,
+            'query_data': query_data
+        }
         self.root = None
 
         self.nodes = []
+        self.function_calls = defaultdict(list)
         self.current_node = None
 
-        self.process(data)
+        self.process(trace_data, query_data)
 
 
     def __str__(self):
@@ -109,6 +127,7 @@ class Trace(object):
         elif event == 'return':
             trace = self.nodes.pop()
             trace.record_return(entry)
+            self.function_calls[trace.key].append(trace)
             self.current_node = trace.previous
             if self.current_node:
                 if trace.total_time > TRACE_THRESHOLD:
@@ -116,11 +135,28 @@ class Trace(object):
         return trace
 
 
-    def process(self, data):
-        first_entry = data.pop(0)
+    def find_node(self, key_info):
+        key, timestamp = key_info[0], datetime.datetime.strptime(key_info[1], PYTHON_DATEFORMAT)
+        for trace in self.function_calls[key]:
+            if trace.start_time == timestamp:
+                return trace
+        return self.root
+
+
+    def process(self, trace_data, query_data):
+        first_entry = trace_data.pop(0)
+
+        # Process traces
         self.root = self.process_trace(first_entry)
-        for entry in data:
+        for entry in trace_data:
             self.process_trace(entry)
+
+        # Process queries
+        self.current_node = self.root
+        for entry in query_data:
+            node = self.find_node(entry['function_call_key'])
+            node.record_query(entry)
+
         return self.root
 
 
@@ -143,7 +179,25 @@ def main():
             "key": "snoopy.trace::b:7"
         }
     ]
-    print Trace(data)
+    query_data = [
+        {
+            "start_time": "2016-03-12T20:56:30.815310",
+            "query": "SELECT * FROM Foo1;"
+        },
+        {
+            "start_time": "2016-03-12T20:56:30.815321",
+            "query": "SELECT * FROM Foo2;"
+        },
+        {
+            "start_time": "2016-03-12T20:56:30.815346",
+            "query": "SELECT * FROM Foo3;"
+        },        {
+            "start_time": "2016-03-12T20:56:30.815350",
+            "query": "SELECT * FROM Foo4;"
+        }
+
+    ]
+    print Trace(data, query_data)
 
 
 if __name__ == '__main__':
